@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spinach Disk Lab: What Changes the Rate of Photosynthesis?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1E1B2E; --paper:#F6F4FA; --card:#FFFFFF; --line:#D9D3E6; --muted:#5A5470;
+  --grow:#A3146F; --grow-d:#7E0F55; --grow-l:#F8E3F0;
+  --leaf:#1F7A4D; --leaf-l:#DDF3E6;
+  --warn:#9A4B00; --warn-l:#FFEBD2;
+  --cold:#1D5FA8; --cold-l:#DCEBFA;
+  --bad:#B3261E; --bad-l:#FBE3E1;
+  --led-r:#D7263D; --led-b:#2B59C3;
+  font-size:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Lexend',Verdana,Tahoma,sans-serif;line-height:1.65;letter-spacing:.012em;color:var(--ink);background:var(--paper);text-align:left}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+:focus-visible{outline:3px solid var(--grow);outline-offset:2px;border-radius:4px}
+button,input,select,textarea{font:inherit;color:inherit}
+header.top{background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}
+header.top::before{content:"";display:block;height:7px;background:
+  radial-gradient(circle at 7px 3.5px,var(--led-r) 0 2.6px,transparent 3px) 0 0/28px 7px repeat-x,
+  radial-gradient(circle at 21px 3.5px,var(--led-b) 0 2.6px,transparent 3px) 0 0/28px 7px repeat-x,#2c2744}
+.bar{display:flex;gap:.75rem;align-items:center;justify-content:space-between;padding:.55rem 1rem;max-width:1000px;margin:0 auto;flex-wrap:wrap}
+.bar h1{font-size:1.02rem;margin:0;font-weight:600;letter-spacing:.01em}
+.tools{display:flex;gap:.4rem;flex-wrap:wrap}
+.tools button{background:#2c2744;color:#fff;border:1.5px solid #5b5480;border-radius:8px;padding:.3rem .7rem;font-size:.82rem;cursor:pointer;min-height:36px}
+.tools button:hover{background:#3b3560}
+.steps{display:flex;gap:.35rem;overflow-x:auto;padding:.1rem 1rem .6rem;max-width:1000px;margin:0 auto;scrollbar-width:thin}
+.steps button{flex:0 0 auto;border:1.5px solid #5b5480;background:transparent;color:#d9d3ee;border-radius:999px;padding:.2rem .75rem;font-size:.78rem;cursor:pointer;white-space:nowrap;min-height:32px}
+.steps button.done{background:#1F7A4D;border-color:#1F7A4D;color:#fff}
+.steps button.cur{background:#fff;color:var(--ink);border-color:#fff;font-weight:600}
+.steps button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1000px;margin:0 auto;padding:1.1rem 1rem 45vh}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:1.1rem 1.25rem;margin:0 0 1.1rem}
+.card h2{font-size:1.28rem;line-height:1.3;margin:.1rem 0 .5rem}
+.card h3{font-size:1.05rem;margin:.9rem 0 .35rem}
+.card p{max-width:64ch;margin:.45rem 0}
+.hd{display:flex;justify-content:space-between;gap:.6rem;align-items:flex-start}
+.say{flex:0 0 auto;background:var(--grow-l);color:var(--grow-d);border:1.5px solid var(--grow);border-radius:8px;padding:.15rem .65rem;font-size:.78rem;cursor:pointer;min-height:34px}
+.say:hover{background:#f2cde5}
+.callout{border-left:6px solid var(--grow);background:var(--grow-l);padding:.7rem .9rem;border-radius:0 10px 10px 0;margin:.8rem 0}
+.callout.leaf{border-color:var(--leaf);background:var(--leaf-l)}
+.callout.warn{border-color:var(--warn);background:var(--warn-l)}
+.eq{font-weight:600;background:#F0EDF8;border-radius:10px;padding:.6rem .9rem;display:inline-block;margin:.3rem 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.opt{display:block;border:2px solid var(--line);border-radius:10px;padding:.55rem .8rem;margin:.4rem 0;cursor:pointer;background:#fff}
+.opt:hover{border-color:var(--grow)}
+.opt input{margin-right:.55rem;transform:scale(1.25)}
+.opt.sel{border-color:var(--grow);background:var(--grow-l)}
+.opt.right{border-color:var(--leaf);background:var(--leaf-l)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-l)}
+.q{margin:1rem 0 .4rem;padding-top:.3rem}
+.q .qt{font-weight:600;margin:0 0 .3rem}
+.fb{margin:.4rem 0 0;padding:.5rem .8rem;border-radius:8px;font-size:.95rem}
+.fb.ok{background:var(--leaf-l);color:#0f4b2e}
+.fb.no{background:var(--bad-l);color:#7a1812}
+.fb:empty{display:none}
+.btn{background:var(--grow);color:#fff;border:2px solid var(--grow);border-radius:10px;padding:.55rem 1.1rem;font-weight:600;cursor:pointer;min-height:46px}
+.btn:hover:not(:disabled){background:var(--grow-d)}
+.btn:disabled{background:#c9c3d8;border-color:#c9c3d8;color:#fff;cursor:not-allowed}
+.btn.alt{background:#fff;color:var(--grow-d)}
+.btn.alt:hover:not(:disabled){background:var(--grow-l)}
+.btn.sm{min-height:38px;padding:.3rem .8rem;font-size:.9rem}
+input[type=text],input[type=number],textarea,select{border:2px solid #8f87ab;border-radius:8px;padding:.4rem .6rem;background:#fff;width:100%}
+textarea{min-height:110px;resize:vertical}
+input.cell{width:4.1rem;text-align:center;padding:.25rem .2rem}
+input.good,select.good{border-color:var(--leaf);background:var(--leaf-l)}
+input.bad,select.bad{border-color:var(--bad);background:var(--bad-l)}
+.tw{overflow-x:auto;margin:.5rem 0}
+table.dt{border-collapse:collapse;min-width:100%;font-size:.92rem}
+table.dt th,table.dt td{border:1.5px solid var(--line);padding:.35rem .5rem;text-align:center;white-space:nowrap}
+table.dt th{background:#F0EDF8}
+table.dt td.l,table.dt th.l{text-align:left;white-space:normal}
+table.dt tr.ctl td{background:#F7F6FB}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:.12rem .7rem;font-size:.85rem}
+.chip.heat{background:var(--warn-l);border-color:var(--warn)}
+.chip.cold{background:var(--cold-l);border-color:var(--cold)}
+.chip.leaf{background:var(--leaf-l);border-color:var(--leaf)}
+.sim{background:linear-gradient(#EFEAF8,#E5DFF2);border-radius:12px;border:2px solid var(--line);padding:.3rem}
+.sim svg{width:100%;height:auto;display:block}
+.disk{transition:transform .9s cubic-bezier(.3,.7,.3,1)}
+.bub{opacity:0;transition:opacity .6s}
+.disk.up .bub{opacity:1}
+.live{font-size:1.15rem;font-weight:600;margin:.4rem 0}
+.live b{color:var(--grow-d)}
+svg.chart{width:100%;height:auto;max-width:700px;display:block;background:#fff;border:2px solid var(--line);border-radius:12px}
+svg.chart .grid{stroke:#E3DEEF;stroke-width:1}
+svg.chart .axis{stroke:#5A5470;stroke-width:2}
+svg.chart text{fill:#1E1B2E;font-family:'Lexend',Verdana,sans-serif}
+svg.chart .tick{font-size:12px}
+svg.chart .alab{font-size:13px;font-weight:600}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin:.35rem 0;font-size:.9rem}
+.legend i{display:inline-block;width:26px;height:0;border-top:4px solid;vertical-align:middle;margin-right:.4rem}
+.legend i.d{border-top-style:dashed}
+.bars .row{display:grid;grid-template-columns:minmax(120px,230px) 1fr 3.3rem;gap:.6rem;align-items:center;margin:.3rem 0;font-size:.92rem}
+.bars .bg{background:#EEEAF6;border-radius:6px;height:22px;position:relative}
+.bars .fill{height:100%;border-radius:6px;background:var(--grow)}
+.bars .fill.ctl{background:var(--ink)}
+.bars .fill.lo{background:var(--cold)}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0 .8rem}
+.tab{border:2px solid var(--line);background:#fff;border-radius:999px;padding:.25rem .85rem;cursor:pointer;font-size:.9rem;min-height:38px}
+.tab.cur{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab.done{border-color:var(--leaf)}
+.tab.done::after{content:" \2713";color:var(--leaf);font-weight:700}
+.tab.cur.done::after{color:#9be3bb}
+.slidr{margin:.7rem 0}
+.slidr label{display:flex;justify-content:space-between;font-weight:600}
+.slidr input[type=range]{width:100%;accent-color:var(--grow);height:32px}
+.gauge{height:30px;background:#EEEAF6;border-radius:8px;overflow:hidden;position:relative;border:2px solid var(--line)}
+.gauge .g{height:100%;background:var(--leaf);transition:width .4s}
+.gauge .mk{position:absolute;top:0;bottom:0;width:3px;background:var(--ink)}
+.fbar{display:grid;grid-template-columns:8.5rem 1fr 3.2rem;gap:.5rem;align-items:center;font-size:.88rem;margin:.25rem 0}
+.fbar .bg{background:#EEEAF6;border-radius:5px;height:14px}
+.fbar .f{height:100%;border-radius:5px;background:#8f87ab}
+.fbar.lim .f{background:var(--bad)}
+.fbar.lim{font-weight:700}
+nav.foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:3px solid var(--line);z-index:15}
+nav.foot div{max-width:1000px;margin:0 auto;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:.8rem}
+nav.foot .hint{font-size:.85rem;color:var(--muted);flex:1;text-align:center}
+.drawer{visibility:hidden;position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:#fff;border-left:3px solid var(--grow);z-index:40;padding:1rem;overflow:auto;transform:translateX(105%);transition:transform .25s}
+.drawer.open{transform:none;visibility:visible}
+.drawer dt{font-weight:700;margin-top:.8rem}
+.drawer dd{margin:.1rem 0 0}
+.scrim{position:fixed;inset:0;background:rgba(30,27,46,.45);z-index:30;display:none}
+.scrim.open{display:block}
+.score{font-size:1.4rem;font-weight:700}
+.chk label{display:block;margin:.35rem 0;cursor:pointer}
+.chk input{transform:scale(1.25);margin-right:.5rem}
+.sumtbl td,.sumtbl th{font-size:.9rem}
+#helpBtn{position:fixed;right:0;top:46%;z-index:25;background:var(--grow);color:#fff;border:3px solid #fff;border-right:0;border-radius:14px 0 0 14px;padding:.6rem .8rem;font-weight:700;font-size:.9rem;line-height:1.25;max-width:7.2rem;cursor:pointer;box-shadow:0 3px 12px rgba(30,27,46,.35)}
+#helpBtn:hover{background:var(--grow-d)}
+td.rec,th.rec,b.rec,.recrow td.rec{background:#FFE08A!important;outline:3px solid #FFB000;outline-offset:-2px;font-weight:700;border-radius:4px}
+b.rec{padding:.05rem .45rem;outline-offset:1px}
+td.mk{border:none!important;background:none!important;color:#8a5a00;font-weight:700;font-size:.72rem;padding:.1rem 0!important;line-height:1.2}
+.recrow th{font-size:.78rem;white-space:normal}
+.recrow td{white-space:normal;font-size:.9rem}
+.recarrow{font-size:1.5rem;font-weight:700;color:#B45309;margin:.2rem 0}
+@keyframes hlpulse{0%,100%{box-shadow:0 0 0 6px rgba(255,176,0,.55)}50%{box-shadow:0 0 0 14px rgba(255,176,0,.15)}}
+.hl{outline:5px solid #FFB000!important;outline-offset:5px;border-radius:10px;animation:hlpulse 1.1s ease-in-out infinite;position:relative;background-color:#FFF8E1}
+.hl::before{content:"\2192  Do this next";position:absolute;top:-30px;left:8px;background:#FFB000;color:#1E1B2E;font-weight:700;font-size:.82rem;padding:.12rem .7rem;border-radius:7px;z-index:6;white-space:nowrap}
+.tab.hl{background:#FFF8E1;color:var(--ink)}
+input.hl::before,textarea.hl::before{display:none}
+#helpPop{position:fixed;left:50%;transform:translateX(-50%);top:150px;z-index:35;width:min(680px,calc(100vw - 20px));background:#fff;border:3px solid var(--grow);border-radius:14px;padding:1rem 1.1rem;box-shadow:0 6px 24px rgba(30,27,46,.4);display:none}
+#helpPop.open{display:block}
+#helpPop.bottom{top:auto;bottom:92px}
+#helpPop h3{margin:0 0 .4rem;font-size:1.05rem;color:var(--grow-d)}
+#helpPop p{margin:.3rem 0 .8rem;font-size:.98rem;line-height:1.5}
+@media print{#helpBtn,#helpPop{display:none!important}header.top,nav.foot,.say,.tools,.noprint{display:none!important}body{background:#fff;font-size:12px}.card{break-inside:avoid;border:1px solid #999}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <h1>Spinach Disk Lab: Rate of Photosynthesis</h1>
+    <div class="tools">
+      <button id="tListen" aria-label="Listen to this page">Listen to page</button>
+      <button id="tStop" aria-label="Stop reading">Stop</button>
+      <button id="tSmall" aria-label="Smaller text">A&minus;</button>
+      <button id="tBig" aria-label="Larger text">A+</button>
+      <button id="tVocab">Word help</button>
+    </div>
+  </div>
+  <div class="steps" id="stepsNav" role="navigation" aria-label="Lab sections"></div>
+</header>
+
+<main id="main" tabindex="-1"></main>
+
+<nav class="foot"><div>
+  <button class="btn alt" id="bBack">Back</button>
+  <span class="hint" id="hint" aria-live="polite"></span>
+  <button class="btn" id="bNext">Next</button>
+</div></nav>
+
+<button id="helpBtn" aria-haspopup="dialog">What do I do next?</button>
+<div id="helpPop" role="dialog" aria-label="Your next step" aria-live="polite"><h3>Your very next step</h3><p id="helpTxt"></p><div style="display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn sm" id="helpSay">Listen</button><button class="btn alt sm" id="helpClose">Close</button></div></div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Word help">
+  <div class="hd"><h2 style="margin:0">Word help</h2><button class="btn alt sm" id="vClose">Close</button></div>
+  <p>Tap Listen to hear a word.</p>
+  <dl id="vocab"></dl>
+</aside>
+
+<script>
+const D = {
+ "conds": {
+  "control": {"name":"Control","d":[0,0,1,2,2,3,4,5,5,6,6]},
+  "light15": {"name":"Light closer (15 cm)","d":[0,1,2,3,5,6,7,8,8,9,9]},
+  "light35": {"name":"Light farther (35 cm)","d":[0,0,0,1,1,2,2,3,3,4,4]},
+  "warm":    {"name":"Warm water (100 °F)","d":[0,0,1,3,4,5,6,7,7,8,8]},
+  "cold":    {"name":"Cold water (ice bath)","d":[0,0,0,0,0,1,1,1,2,2,2]},
+  "moreco2": {"name":"More CO₂ (extra baking soda)","d":[0,1,2,4,5,7,8,9,9,10,10]},
+  "noco2":   {"name":"No CO₂ (no baking soda)","d":[0,0,0,0,0,0,0,0,1,1,1]},
+  "redblue": {"name":"Red and blue light","d":[0,1,2,3,4,6,6,7,8,8,9]},
+  "green":   {"name":"Green light","d":[0,0,0,1,1,1,2,2,2,3,3]}
+ },
+ "light": {"x":[15,25,35],"y":[0.9,0.6,0.4]},
+ "temp":  {"x":[40,60,72,85,100,104,113,122,140],"y":[0.2,0.45,0.6,0.72,0.8,0.84,0.54,0.2,0.0]},
+ "co2":   {"x":["0","1/16","1/8","1/4","1/2","1"],"y":[0.1,0.6,0.8,0.9,1.0,1.0]},
+ "wave":  {"x":[400,425,450,475,500,525,550,575,600,625,650,675,700],"y":[60,100,90,60,35,20,10,20,40,65,90,100,45]}
+};
+</script>
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KEY = 'spinachDiskLab.v6';
+const TEACHER = /[?&]teacher=1/.test(location.search);
+const C = D.conds;
+const ORDER = ['control','light15','light35','redblue','green','warm','cold','moreco2','noco2'];
+const CTLQ = ['ctl_read','ctl_first','ctl_pattern','why_control'];
+const TESTED = ['light15','light35','redblue','green'];
+const NEWV = ['warm','cold','moreco2','noco2'];
+const rateOf = k => C[k].d[10] / 10;
+const et50 = k => { const i = C[k].d.findIndex(v => v >= 5); return i < 0 ? null : i; };
+const fmt = n => (Math.round(n*100)/100).toString();
+const SETUP = {
+  control:{dist:25,color:'white',soda:1,temp:'room'},
+  light15:{dist:15,color:'white',soda:1,temp:'room'},
+  light35:{dist:35,color:'white',soda:1,temp:'room'},
+  warm:{dist:25,color:'white',soda:1,temp:'warm'},
+  cold:{dist:25,color:'white',soda:1,temp:'cold'},
+  moreco2:{dist:25,color:'white',soda:8,temp:'room'},
+  noco2:{dist:25,color:'white',soda:0,temp:'room'},
+  redblue:{dist:25,color:'rb',soda:1,temp:'room'},
+  green:{dist:25,color:'green',soda:1,temp:'room'}
+};
+const WHY = {
+  light15:'Closer light means brighter light, so more light energy reaches the chloroplasts and the light reactions run faster. A closer light also warms the water a little, which can speed up enzymes too.',
+  light35:'Farther light means dimmer light, so less light energy reaches the chloroplasts. The water also stays cooler because less heat reaches it. Both effects slow photosynthesis down.',
+  warm:'Warmer water makes molecules move faster, and enzymes work faster. This only helps up to a point. If it gets too hot, enzymes stop working.',
+  cold:'Cold slows down molecules and enzymes, so the reactions of photosynthesis happen more slowly.',
+  moreco2:'CO\u2082 is a reactant (a raw material) for photosynthesis. More CO\u2082 gives the leaf more to work with.',
+  noco2:'Without CO\u2082 the leaf has no raw material to build sugar. Photosynthesis almost stops.',
+  redblue:'Chlorophyll absorbs red and blue light the best. Those colors give the leaf the most usable energy.',
+  green:'Chlorophyll reflects green light instead of absorbing it. Green light gives the leaf very little usable energy.'
+};
+const FACTORS = {light:'Brightness of the light',temp:'Temperature',co2:'Amount of CO\u2082',color:'Color of the light'};
+
+/* ---------- state ---------- */
+const blank = () => ({name:'',step:0,first:'',firstWhy:'',ctl:{rec:Array(11).fill(null),minute:0},
+  pred:{},ran:{},rate:{},cmp:{},pct:{},ans:{},gtab:'light',interp:{},
+  design:{tests:0,cfg:{dist:25,color:'white',soda:1,tempI:2},best:0,why:''},
+  cer:{claim:'',ev:[],reason:'',checks:[]},wrote:{},rec:{},refl:'',reflPick:'',maxStep:0});
+let S = blank();
+try{ const raw = localStorage.getItem(KEY); if(raw) S = Object.assign(blank(), JSON.parse(raw)); }catch(e){}
+let st = null;
+const save = () => { clearTimeout(st); st = setTimeout(()=>{ try{localStorage.setItem(KEY, JSON.stringify(S));}catch(e){} }, 200); };
+
+/* ---------- read aloud ---------- */
+function speak(text){
+  if(!('speechSynthesis' in window)) { alert('Read aloud is not available on this device.'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/CO\u2082/g,'carbon dioxide').replace(/O\u2082/g,'oxygen').replace(/\u00b0F/g,' degrees Fahrenheit'));
+  u.rate = 0.92; speechSynthesis.speak(u);
+}
+function cardText(card){
+  const c = card.cloneNode(true);
+  $$('.say,svg,.noread,button.btn',c).forEach(e=>e.remove());
+  $$('input,select,textarea',c).forEach(e=>e.remove());
+  return c.innerText.replace(/\s+/g,' ').trim();
+}
+
+/* ---------- vocabulary ---------- */
+const VOCAB = [
+ ['Photosynthesis','How plants use light energy, water, and carbon dioxide to make sugar and oxygen.'],
+ ['Rate','How fast something happens. Here, how many disks float each minute.'],
+ ['Control','The normal setup that we compare every changed setup to.'],
+ ['Variable','The one thing we change on purpose to see what happens.'],
+ ['Limiting factor','The thing in shortest supply. It keeps the rate from going higher.'],
+ ['Reactant','A raw material that a reaction uses up. CO\u2082 and water are reactants of photosynthesis.'],
+ ['Enzyme','A protein that speeds up a reaction in a cell.'],
+ ['Denature','When an enzyme changes shape (often from too much heat) and stops working.'],
+ ['Chlorophyll','The green pigment in chloroplasts that absorbs light.'],
+ ['Absorb','To take in. Chlorophyll absorbs red and blue light.'],
+ ['Reflect','To bounce back. Leaves reflect green light, so we see them as green.'],
+ ['Wavelength','The distance between waves of light. It is measured in nanometers (nm). Each color has its own wavelength.'],
+ ['Percent change','How much a number went up or down compared to where it started, written as a percent.']
+];
+$('#vocab').innerHTML = VOCAB.map(([w,d])=>`<dt>${w} <button class="say" data-w="${esc(w+'. '+d)}">Listen</button></dt><dd>${d}</dd>`).join('');
+
+/* ---------- record-it helper ---------- */
+const doneC = k => !!S.ran[k] && !!(S.rec && S.rec[k]);
+const ROWN={control:'Control',light15:'Light closer',light35:'Light farther',redblue:'Red/blue light',green:'Green light',warm:'Warm water',cold:'Ice bath',moreco2:'More CO\u2082',noco2:'No CO\u2082'};
+const WHATCH={control:'nothing, normal setup',light15:'Light moved to 15 cm',light35:'Light moved to 35 cm',redblue:'Red and blue light',green:'Green light',warm:'Water at 100 \u00b0F',cold:'Ice-bath water',moreco2:'1/2 tsp baking soda',noco2:'No baking soda'};
+function mkRow(){ return `<tr><td class="mk"></td>${MINS.map(i=>`<td class="mk">${i===5||i===10?'\u2191 write':''}</td>`).join('')}</tr>`; }
+function recInner(k){
+  const on=!!(S.rec&&S.rec[k]), ctl=k==='control';
+  let fs;
+  if(ctl) fs='\u2014';
+  else if(TESTED.includes(k)) fs = okQ('cmp_'+k) ? (rateOf(k)>rateOf('control')?'faster':'slower') : 'answer the question below first';
+  else fs = S.ran[k] ? (rateOf(k)>rateOf('control')?'faster':'slower') : 'run the trial first';
+  return `<div class="callout warn"><div class="recarrow" aria-hidden="true">\u2193 \u2193 \u2193</div><b>Write this in your chart.</b> Open your worksheet. Find the row called <b>${ROWN[k]}</b> in the Results chart. Copy the numbers from the gold boxes below into that row.</div>
+  <div class="tw"><table class="dt recrow"><tr><th>Trial</th><th>What changed</th><th>Disks at minute 5</th><th>Disks at minute 10</th><th>Rate (disks per min)</th><th>Faster or slower than the control?</th></tr>
+  <tr><td class="l"><b>${ROWN[k]}</b></td><td class="rec">${WHATCH[k]}</td><td class="rec">${C[k].d[5]}</td><td class="rec">${C[k].d[10]}</td><td class="rec">${fmt(rateOf(k))}</td><td class="${ctl||fs==='faster'||fs==='slower'?'rec':''}">${fs}</td></tr></table></div>
+  <label class="opt ${on?'sel':''}"><input type="checkbox" data-rec="${k}" ${on?'checked':''}>I copied this row into my chart.</label>`;
+}
+function recBox(k){ return `<div id="recwrap">${recInner(k)}</div>`; }
+function updateRec(){ const w=$('#recwrap'); if(w&&curC) w.innerHTML=recInner(curC); }
+/* ---------- write-it-down helper ---------- */
+function wrote(key,msg){
+  const on=!!(S.wrote&&S.wrote[key]);
+  return `<div class="callout warn"><b>Write it on your worksheet:</b> ${msg}</div><label class="opt ${on?'sel':''}"><input type="checkbox" data-wrote="${key}" ${on?'checked':''}>I wrote my answer on my worksheet.</label>`;
+}
+/* ---------- question helpers ---------- */
+const Q = {
+ why_float:{q:'Why do the spinach disks float after the light is turned on?',o:['The disks soak up more water.','Photosynthesis makes oxygen gas that gets trapped in the disk.','The baking soda mixture gets hotter.','The disks lose their chlorophyll.'],a:1,ok:'Yes. Photosynthesis releases O\u2082 gas. The gas makes the disk lighter than the water, so it floats.',hint:'Think about which gas photosynthesis gives off.'},
+ baking:{q:'What is the baking soda mixture for?',o:['It makes the water cloudy so the light is dimmer.','It gives the spinach carbon dioxide (CO\u2082), a raw material for photosynthesis.','It keeps the disks from floating.','It cools the water.'],a:1,ok:'Right. Baking soda dissolves and gives off CO\u2082 that the leaf can use.',hint:'Which raw material does a leaf need besides water and light?'},
+ faster:{q:'Which result means a FASTER rate of photosynthesis?',o:['Fewer disks floating in more time','The same number of disks, but it takes longer','More disks floating in less time','No disks floating at all'],a:2,ok:'Yes. A faster rate means more oxygen is made sooner, so more disks float in less time.',hint:'Faster means more happens in less time.'},
+ why_control:{q:'Why do we run a control trial first?',o:['So we have a normal trial to compare each changed trial to.','So the disks will float faster.','Because the teacher said to.','So we can change many things at once.'],a:0,ok:'Yes. The control shows what normally happens. We can tell if a change sped things up or slowed them down.',hint:'Think about what you compare your later results to.'},
+ ctl_read:{q:'How many disks were floating at minute 5?',o:['2','3','5','6'],a:1,ok:'Yes. Find 5 on the minute row and read the number below it: 3 disks.',hint:'Look at the Minute row, find 5, then read the number in the Control row.'},
+ ctl_first:{q:'At which minute did the first disk float?',o:['Minute 0','Minute 1','Minute 2','Minute 5'],a:2,ok:'Yes. The count first goes above 0 at minute 2.',hint:'Find the first number in the row that is bigger than 0.'},
+ ctl_pattern:{q:'Which sentence best describes the control data?',o:['The number of floating disks goes up steadily over the 10 minutes.','No disks floated.','All 10 disks floated right away.','The number of floating disks went down.'],a:0,ok:'Yes. The line climbs slowly and steadily. This is our normal rate to compare other trials to.',hint:'Look at how the numbers change from left to right.'},
+ time_rate_unused:{q:'Trial A reaches 5 floating disks in 4 minutes. Trial B takes 7 minutes. Which trial has the faster rate?',o:['Trial A','Trial B','They are the same'],a:0,ok:'Yes. Less time to get the same result means a faster rate.',hint:'Which trial got to 5 disks sooner?'},
+ light_trend:{q:'Look at the light graph. What happens to the rate as the light moves farther away?',o:['The rate goes up','The rate goes down','The rate stays the same'],a:1,ok:'Yes. Farther light is dimmer, so the rate goes down.',hint:'Compare the point at 15 cm to the point at 35 cm.'},
+ temp_peak:{q:'Look at the temperature graph. At which temperature was the rate the highest?',o:['72 \u00b0F','85 \u00b0F','104 \u00b0F','122 \u00b0F'],a:2,ok:'Yes. The top of the curve is at 104 \u00b0F.',hint:'Find the highest point on the line.'},
+ temp_drop:{q:'Above 104 \u00b0F the rate falls fast. What is the best explanation?',o:['The spinach ran out of water.','The enzymes denature (change shape) and stop working.','The light got dimmer.','Carbon dioxide turned into oxygen.'],a:1,ok:'Yes. Too much heat denatures enzymes, so photosynthesis slows or stops.',hint:'Think about what heat does to enzymes.'},
+ co2_trend:{q:'Which sentence best describes the CO\u2082 graph?',o:['The rate rises quickly at first, then levels off.','The rate drops the more CO\u2082 there is.','The rate rises at the same speed the whole time.','The rate does not change.'],a:0,ok:'Yes. This is called a plateau. The line rises, then flattens.',hint:'Describe the shape: steep at first, then what?'},
+ co2_limit:{q:'The rate stops rising after 1/2 tsp of baking soda. What does that tell you?',o:['CO\u2082 is hurting the leaf.','Another factor, like light or temperature, is now limiting the rate.','The disks are too heavy.','The graph must be wrong.'],a:1,ok:'Yes. Once there is enough CO\u2082, something else becomes the limiting factor.',hint:'If more CO\u2082 does not help anymore, what else could be holding the rate back?'},
+ col_best:{q:'Look at the light color graph. Which wavelengths work best for photosynthesis?',o:['425 nm and 675 nm','500 nm and 550 nm','550 nm only','600 nm and 700 nm'],a:0,ok:'Yes. The two peaks are near 425 nm (blue-violet) and 675 nm (red).',hint:'Find the two tallest peaks.'},
+ col_green:{q:'Spinach leaves look green. What does that tell you about green light (about 550 nm)?',o:['The leaf absorbs most green light.','The leaf reflects most green light, so it is not used much.','Green light makes the leaf grow fastest.','Green light is the brightest light.'],a:1,ok:'Yes. We see the light that bounces off the leaf. Green is reflected, so it is the least useful color.',hint:'We see the color that is reflected, not absorbed.'},
+ ex_limit:{q:'What is a limiting factor?',o:['The factor in shortest supply that keeps the rate from going higher','The factor that is the easiest to change','The factor that always speeds up a reaction','A factor that has to be removed first'],a:0,ok:'Yes.',hint:'It limits, or holds back, the rate.'},
+ ex_plateau:{q:'A graph shows the rate going up as light increases, then leveling off. Which change could raise the rate again?',o:['Add even more light','Add more CO\u2082 or warm the water toward the best temperature','Turn the light off','Remove the spinach'],a:1,ok:'Yes. More light does not help at the plateau. A different limiting factor must be fixed.',hint:'Adding more of the same thing no longer helps. What else could be limiting?'},
+ ex_data:{q:'In an experiment the control had 6 floating disks, warm water had 8, and ice water had 2. Which statement is supported by the data?',o:['Temperature has no effect.','Warm water sped up the rate and cold water slowed it, compared with the control.','Ice water made more CO\u2082.','Warm water always gives the fastest rate.'],a:1,ok:'Yes. Compare each trial to the control: 8 is more than 6, and 2 is less than 6.',hint:'Compare each number to the control number (6).'},
+ ex_var:{q:'Only ONE thing was changed in each trial. Why?',o:['It is faster to set up.','So any change in the rate can be linked to that one thing.','Because it is against the rules to change two things.','So the control is not needed.'],a:1,ok:'Yes. If you change two things, you cannot tell which one caused the result.',hint:'What happens if two things change at once?'}
+};
+TESTED.forEach(k=>{ const dir=()=>rateOf(k)>rateOf('control')?'faster':rateOf(k)<rateOf('control')?'slower':'about the same';
+  Q['cmp_'+k]={q:'Compare this trial with the control. The rate of photosynthesis was...',o:['faster','slower','about the same'],get a(){return ['faster','slower','about the same'].indexOf(dir());},ok:'Yes. '+WHY[k],hint:'Compare the disks floating at 10 minutes with the control (6 disks). More disks means a faster rate.'}; });
+function mc(id){
+  const q = Q[id], a = S.ans[id];
+  return `<div class="q" data-q="${id}"><p class="qt">${q.q}</p>` +
+   q.o.map((t,i)=>`<label class="opt ${a&&a.ok&&i===q.a?'right':''} ${a&&a.pick===i&&!a.ok?'wrong':''}"><input type="radio" name="${id}" value="${i}" ${a&&a.pick===i?'checked':''} ${a&&a.ok?'disabled':''}>${t}</label>`).join('') +
+   `<div class="fb ${a?(a.ok?'ok':'no'):''}" aria-live="polite">${a?(a.ok?q.ok:'Not quite. '+q.hint+' Try again.'):''}</div></div>`;
+}
+const okQ = id => !!(S.ans[id] && S.ans[id].ok);
+const allQ = ids => ids.every(okQ);
+
+/* ---------- charts ---------- */
+function lineChart(o){
+  const W=o.w||680,H=o.h||350,L=60,R=24,T=18,B=58,pw=W-L-R,ph=H-T-B;
+  const X=(x,i)=> o.cat ? L+(i/(o.cat.length-1))*pw : L+(x-o.xmin)/(o.xmax-o.xmin)*pw;
+  const Y=y=> T+ph-(y-o.ymin)/(o.ymax-o.ymin)*ph;
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.desc||'')}">`;
+  o.yticks.forEach(t=>{ s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${Y(t)}" y2="${Y(t)}"/><text class="tick" x="${L-9}" y="${Y(t)+4}" text-anchor="end">${o.yfmt?o.yfmt(t):t}</text>`; });
+  if(o.cat) o.cat.forEach((c,i)=>{ s+=`<text class="tick" x="${X(0,i)}" y="${T+ph+20}" text-anchor="middle">${c}</text>`; });
+  else o.xticks.forEach(t=>{ s+=`<line class="grid" x1="${X(t)}" x2="${X(t)}" y1="${T}" y2="${T+ph}"/><text class="tick" x="${X(t)}" y="${T+ph+20}" text-anchor="middle">${t}</text>`; });
+  s+=`<line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}"/><line class="axis" x1="${L}" y1="${T+ph}" x2="${W-R}" y2="${T+ph}"/>`;
+  s+=`<text class="alab" x="${L+pw/2}" y="${H-10}" text-anchor="middle">${o.xlabel}</text>`;
+  s+=`<text class="alab" transform="translate(16 ${T+ph/2}) rotate(-90)" text-anchor="middle">${o.ylabel}</text>`;
+  if(o.hline!=null) s+=`<line x1="${L}" x2="${W-R}" y1="${Y(o.hline)}" y2="${Y(o.hline)}" stroke="#B3261E" stroke-width="2" stroke-dasharray="3 5"/>`;
+  o.series.forEach(se=>{
+    const pts=se.pts.map((p,i)=>[X(p[0],i),Y(p[1])]);
+    s+=`<polyline fill="none" stroke="${se.color}" stroke-width="3.5" ${se.dash?'stroke-dasharray="9 6"':''} stroke-linejoin="round" points="${pts.map(p=>p.join(',')).join(' ')}"/>`;
+    if(se.dots!==false) pts.forEach((p,i)=>{ s+=`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${se.pc?se.pc[i]:se.color}" stroke="#fff" stroke-width="1.5"/>`; });
+  });
+  return s+'</svg>';
+}
+function tableOf(head,rows){ return `<details class="noprint"><summary>See the data in a table</summary><div class="tw"><table class="dt"><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div></details>`; }
+const MINS=[0,1,2,3,4,5,6,7,8,9,10];
+function trialChart(key, showCtl=true){
+  const series=[]; if(showCtl||key==='control') series.push({name:'Control',color:'#1E1B2E',pts:C.control.d.map((v,i)=>[i,v])});
+  if(key!=='control') series.push({name:C[key].name,color:'#A3146F',dash:true,pts:C[key].d.map((v,i)=>[i,v])});
+  return lineChart({series,xmin:0,xmax:10,ymin:0,ymax:10,xticks:MINS,yticks:[0,2,4,6,8,10],xlabel:'Time (minutes)',ylabel:'Disks floating',hline:5,
+    desc:`Line graph of disks floating each minute for ${series.map(s=>s.name).join(' and ')}. A dotted red line marks 5 disks.`});
+}
+
+/* ---------- beaker simulation ---------- */
+function beakerSVG(su){
+  const lx = 150 - su.dist*3.6, op = Math.max(.35, Math.min(1, 1.25 - su.dist/45));
+  const rc = su.color==='rb' ? ['#D7263D','#2B59C3','#D7263D'] : su.color==='green' ? ['#2E9E4F','#2E9E4F','#2E9E4F'] : ['#E0A800','#E0A800','#E0A800'];
+  let s=`<svg viewBox="0 0 380 290" role="img" aria-label="Beaker with spinach disks. Light is ${su.dist} centimeters away.">`;
+  if(su.temp==='cold'){ s+=`<rect x="193" y="128" width="144" height="130" rx="10" fill="#CFE3F7" stroke="#1D5FA8" stroke-width="2"/>`;
+    [[198,205],[208,236],[316,212],[323,240],[312,176],[200,168]].forEach(c=>{ s+=`<rect x="${c[0]}" y="${c[1]}" width="16" height="16" rx="3" fill="#fff" stroke="#8DB5DE" transform="rotate(${c[0]%20-8} ${c[0]+8} ${c[1]+8})"/>`; }); }
+  s+=`<rect x="205" y="120" width="120" height="130" fill="#BFE6EC" opacity=".85"/><path d="M205 70 V250 Q205 258 213 258 H317 Q325 258 325 250 V70" fill="none" stroke="#1E1B2E" stroke-width="3"/>`;
+  const dots = su.soda===0?0:su.soda===1?4:16;
+  for(let i=0;i<dots;i++){ const x=212+((i*37+11)%100), y=130+((i*53+7)%70); s+=`<circle cx="${x}" cy="${y}" r="2.2" fill="#fff" stroke="#9fc9d1" stroke-width=".6"/>`; }
+  s+=`<g class="disks">`;
+  for(let i=0;i<10;i++){ s+=`<g class="disk" data-i="${i}" style="transform:translate(${220+(i%5)*20}px,${242-Math.floor(i/5)*18}px)"><circle r="8.5" fill="#2E7D32" stroke="#14471a" stroke-width="1.5"/><path d="M-5 0 H5" stroke="#7BC47F" stroke-width="1.5"/><circle class="bub" cx="4" cy="-11" r="2.6" fill="#fff" stroke="#6aa" stroke-width=".8"/></g>`; }
+  s+=`</g>`;
+  if(su.temp==='warm'){ s+=`<rect x="195" y="260" width="140" height="12" rx="3" fill="#9A4B00"/>`; [225,265,305].forEach(x=>{ s+=`<path d="M${x} 56 q6 -9 0 -18 q-6 -9 0 -18" fill="none" stroke="#B45309" stroke-width="3" stroke-linecap="round"/>`; }); }
+  const bulb = su.color==='rb' ? `<circle cx="${lx}" cy="150" r="16" fill="#D7263D"/><path d="M${lx} 134 A16 16 0 0 1 ${lx} 166 Z" fill="#2B59C3"/><circle cx="${lx}" cy="150" r="16" fill="none" stroke="#1E1B2E" stroke-width="2"/>` : `<circle cx="${lx}" cy="150" r="16" fill="${su.color==='green'?'#3DBE63':'#FFD84D'}" stroke="${su.color==='green'?'#14602f':'#7a5b00'}" stroke-width="2"/>`;
+  s+=`<g>${bulb}<rect x="${lx-6}" y="164" width="12" height="40" fill="#5A5470"/><rect x="${lx-16}" y="202" width="32" height="6" rx="2" fill="#1E1B2E"/></g>`;
+  [128,150,172].forEach((y,i)=>{ s+=`<line x1="${lx+20}" y1="${150+(y-150)*.3}" x2="${197}" y2="${y}" stroke="${rc[i]}" stroke-width="3" stroke-dasharray="7 5" opacity="${op}"/>`; });
+  s+=`<line x1="${lx}" y1="226" x2="205" y2="226" stroke="#1E1B2E" stroke-width="2"/><line x1="${lx}" y1="220" x2="${lx}" y2="232" stroke="#1E1B2E" stroke-width="2"/><line x1="205" y1="220" x2="205" y2="232" stroke="#1E1B2E" stroke-width="2"/>`;
+  s+=`<text x="${(lx+205)/2}" y="246" text-anchor="middle" font-size="14" font-weight="700" fill="#1E1B2E" font-family="Lexend,Verdana,sans-serif">${su.dist} cm</text>`;
+  return s+`</svg>`;
+}
+function mountSim(el, key, count=0){ el.innerHTML = beakerSVG(SETUP[key]); setDisks(el, count); }
+function setDisks(el, n){
+  $$('.disk',el).forEach(g=>{ const i=+g.dataset.i, col=i%5, row=Math.floor(i/5), up=i<n;
+    g.style.transform = `translate(${220+col*20}px,${up?(132+row*17):(242-row*18)}px)`; g.classList.toggle('up',up); });
+}
+function setupChips(key){
+  const su=SETUP[key], base=SETUP.control, f=(a,b)=>a!==b?' leaf':'';
+  const soda = su.soda===0?'none':su.soda===1?'1/16 tsp':'1/2 tsp';
+  const tmp = su.temp==='warm'?'warm, 100 \u00b0F':su.temp==='cold'?'ice bath':'room temperature';
+  const col = su.color==='rb'?'red and blue light':su.color==='green'?'green light':'white light';
+  return `<div class="chips"><span class="chip${f(su.dist,base.dist)}">Light: ${su.dist} cm away</span><span class="chip${f(su.color,base.color)}">Color: ${col}</span><span class="chip${f(su.soda,base.soda)}">Baking soda: ${soda}</span><span class="chip${su.temp==='warm'?' heat':su.temp==='cold'?' cold':''}">Water: ${tmp}</span></div>`;
+}
+
+/* ---------- steps ---------- */
+const NAMES=['Start','Method','Results','Graphs','Design','Check'];
+const complete = [
+ ()=> S.name.trim().length>0 && !!S.first && !!S.wrote.first,
+ ()=> allQ(['why_float','baking','faster']),
+ ()=> ORDER.every(doneC),
+ ()=> allQ(['light_trend','temp_peak','temp_drop','co2_trend','co2_limit','col_best','col_green']) && S.interp.ok,
+ ()=> S.design.tests>=3 && S.design.best>=250 && !!S.design.c2 && !!S.design.c3 && !!S.wrote.design,
+ ()=> allQ(['ex_limit','ex_plateau','ex_data','ex_var']) && !!S.reflPick && !!S.wrote.refl
+];
+const HINTS=['Type your name and pick one idea to continue.','Answer all three questions correctly.','Finish every experiment, starting with the control, and record each one on your chart.','Answer every graph question.','Test 3 setups, finish all three challenges, and fill in Part 5 on your worksheet.',''];
+
+function stepHTML(n){ return [s0,s1,s3,s5,s6,s8][n](); }
+const head=(t,extra='')=>`<div class="hd"><h2>${t}</h2><button class="say">Listen</button></div>${extra}`;
+
+function s0(){
+  const opts = Object.entries(FACTORS).map(([k,t])=>`<label class="opt ${S.first===k?'sel':''}"><input type="radio" name="first" value="${k}" ${S.first===k?'checked':''}>${t}</label>`).join('');
+  return `<section class="card">${head('The greenhouse mystery')}
+   <p>The spinach in a greenhouse is growing slowly. The grower thinks photosynthesis is happening too slowly.</p>
+   <p><b>Photosynthesis</b> is how a leaf uses light energy to turn water and carbon dioxide into sugar and oxygen.</p>
+   <div class="eq">carbon dioxide + water + light energy \u2192 sugar + oxygen</div>
+   <p>The speed of this process is called the <b>rate of photosynthesis</b>. Your job is to find out what makes it faster and what makes it slower. You will run a virtual spinach disk lab, collect data, and analyze it like a scientist.</p>
+   <div class="callout"><b>Tip:</b> Use <b>Listen</b> to hear any section. Use <b>Word help</b> at the top for key terms.</div></section>
+  <section class="card"><h2>Before you begin</h2>
+   <label for="nm"><b>Your name</b></label><input type="text" id="nm" autocomplete="name" value="${esc(S.name)}" placeholder="First and last name">
+   <div class="q"><p class="qt">Which one do you think changes the rate of photosynthesis the MOST?</p>${opts}</div>
+   <p><b>Why do you think so?</b></p>${wrote('first','Part 1, question 2. Write one sentence that says why you picked that factor.')}</section>`;
+}
+function s1(){
+  return `<section class="card">${head('How do you measure a rate you cannot see?')}
+   <p>You cannot watch photosynthesis happen. But you can watch what it makes: oxygen gas. Scientists use small disks punched from spinach leaves.</p>
+   <div class="tabs" id="mtabs">${['Punch disks','Remove air','Turn on the light','Count disks'].map((t,i)=>`<button class="tab ${i===0?'cur':''}" data-m="${i}">${i+1}. ${t}</button>`).join('')}</div>
+   <div class="grid2"><div class="sim" id="mfig"></div><div id="mtxt" aria-live="polite"></div></div></section>
+  <section class="card"><h2>Check your understanding</h2>${mc('why_float')}${mc('baking')}${mc('faster')}</section>`;
+}
+const METH=[
+ ['Punch disks','Use a straw to punch 10 small disks out of a spinach leaf. Each disk is full of tiny air spaces, so it starts out floating.'],
+ ['Remove air','Put the disks in a syringe with the baking soda mixture. Pull the plunger to make a vacuum. Air leaves the disks and liquid fills the spaces. Now the disks sink.'],
+ ['Turn on the light','Pour the disks into a beaker with baking soda mixture. Put a light 25 cm away. In the light, the leaf does photosynthesis and makes oxygen (O\u2082) bubbles. The bubbles make each disk float.'],
+ ['Count disks','Every minute, count how many disks are floating. More disks floating sooner means a faster rate of photosynthesis.']
+];
+function methFig(i){
+  if(i===0) return `<svg viewBox="0 0 380 260" role="img" aria-label="A drinking straw punching round disks out of a green leaf"><path d="M40 150 C90 40 260 30 340 120 C260 230 120 240 40 150Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="3"/><path d="M40 150 C130 140 230 130 340 120" stroke="#1B5E20" stroke-width="3" fill="none"/><circle cx="150" cy="105" r="14" fill="none" stroke="#1E1B2E" stroke-width="2.5" stroke-dasharray="4 4"/><circle cx="205" cy="98" r="14" fill="none" stroke="#1E1B2E" stroke-width="2.5" stroke-dasharray="4 4"/><circle cx="260" cy="112" r="14" fill="#2E7D32" stroke="#14471a" stroke-width="2.5"/><rect x="236" y="30" width="48" height="52" rx="6" fill="#E6E0F4" stroke="#1E1B2E" stroke-width="2.5" transform="rotate(8 260 56)"/></svg>`;
+  if(i===1) return `<svg viewBox="0 0 380 260" role="img" aria-label="A syringe with the plunger pulled back, disks sinking in liquid"><rect x="90" y="100" width="210" height="62" rx="8" fill="#BFE6EC" stroke="#1E1B2E" stroke-width="3"/><rect x="300" y="122" width="52" height="18" fill="#C9C3D8" stroke="#1E1B2E" stroke-width="3"/><rect x="38" y="84" width="14" height="94" fill="#5A5470"/><rect x="52" y="124" width="60" height="14" fill="#5A5470"/>${[130,152,174,196,218].map(x=>`<circle cx="${x}" cy="150" r="9" fill="#2E7D32" stroke="#14471a" stroke-width="2"/>`).join('')}<path d="M70 70 H30" stroke="#A3146F" stroke-width="4"/><text x="30" y="60" font-size="14" font-weight="700" fill="#A3146F" font-family="Lexend,Verdana,sans-serif">pull back</text></svg>`;
+  if(i===2) return beakerSVG({dist:25,color:'white',soda:1,temp:'room'});
+  return `<svg viewBox="0 0 380 260" role="img" aria-label="A tally table: minutes and disks floating"><rect x="40" y="30" width="300" height="200" rx="10" fill="#fff" stroke="#1E1B2E" stroke-width="3"/>${[0,1,2,3,4].map(r=>`<line x1="40" x2="340" y1="${70+r*32}" y2="${70+r*32}" stroke="#D9D3E6" stroke-width="2"/>`).join('')}<line x1="160" y1="30" x2="160" y2="230" stroke="#D9D3E6" stroke-width="2"/><text x="60" y="56" font-size="15" font-weight="700" font-family="Lexend,Verdana,sans-serif">Minute</text><text x="178" y="56" font-size="15" font-weight="700" font-family="Lexend,Verdana,sans-serif">Floating</text>${[[0,0],[1,0],[2,1],[3,2],[4,2]].map((p,r)=>`<text x="90" y="${94+r*32}" font-size="16" font-family="Lexend,Verdana,sans-serif">${p[0]}</text><text x="230" y="${94+r*32}" font-size="16" font-family="Lexend,Verdana,sans-serif">${p[1]}</text>`).join('')}</svg>`;
+}
+function s3(){
+  const tg = TEACHER?'button':'span';
+  const tabs = ORDER.map(k=>`<${tg} class="tab ${doneC(k)?'done':''}" data-c="${k}">${C[k].name}</${tg}>`).join('');
+  return `<section class="card">${head('Analyze the results')}
+   <p>Work through the experiments <b>one at a time</b>. <b>Start with the control</b>, which is the normal setup. Then do each changed experiment. When you finish one, click <b>Next experiment</b> and the page moves you to the next one. Your class already tested <b>light intensity</b> (closer and farther light) and <b>light color</b> in the lab. Study that data and compare each trial to the control. For every trial, <b>record the data</b> on the Results chart in your worksheet. Then <b>predict</b> what will happen with <b>water temperature</b> and <b>carbon dioxide</b>, which you did not test.</p><div class="tabs" id="ctabs">${tabs}</div></section>
+   <section class="card" id="cpanel"></section>
+   <div id="nextExp" style="margin:0 0 1.1rem"></div>
+   <section class="card" id="board" hidden></section>`;
+}
+let curC = null, timer = null;
+function curCond(){ return ORDER.find(k=>!doneC(k)) || null; }
+function refreshNextExp(){
+  const box=$('#nextExp'); if(!box) return;
+  const all=ORDER.every(doneC), done=curC&&doneC(curC);
+  box.innerHTML = all ? '<div class="callout leaf"><b>All the experiments are finished.</b> Click the <b>Next</b> button at the bottom of the page to keep going.</div>' : done ? '<button class="btn" id="nextExpBtn">Next experiment</button>' : '';
+}
+function showCond(k){
+  curC=k; clearInterval(timer);
+  $$('#ctabs .tab').forEach(b=>b.classList.toggle('cur',b.dataset.c===k));
+  if(k==='control'){
+    $('#cpanel').innerHTML=`<div class="hd"><h2>Control (the normal setup)</h2><button class="say">Listen</button></div>
+    <p>Do this one first. The <b>control</b> is the normal setup. Every other experiment is compared to it.</p>${setupChips('control')}
+    <div class="tw"><table class="dt"><tr><th class="l">Minute</th>${MINS.map(i=>`<th>${i}</th>`).join('')}</tr><tr class="ctl"><th class="l">Disks floating</th>${C.control.d.map((v,i)=>`<td class="${i===5||i===10?'rec':''}">${v}</td>`).join('')}</tr>${mkRow()}</table></div>
+    <div class="legend"><span><i style="border-color:#1E1B2E"></i>Control</span></div>${trialChart('control',false)}
+    <p>Each dot is one minute. The dotted red line marks 5 floating disks.</p>
+    <p class="live">Control rate: <b class="rec">${fmt(rateOf('control'))}</b> disks per minute.</p><p class="noread" style="font-size:.85rem">Rate = disks floating at 10 minutes \u00f7 10 minutes (6 \u00f7 10 = 0.6). Every rate you see later is figured out the same way.</p>
+    ${recBox('control')}
+    <h3>Analyze the control data</h3>${CTLQ.map(mc).join('')}`;
+    return;
+  }
+  if(TESTED.includes(k)){
+    $('#cpanel').innerHTML=`<div class="hd"><h2>${C[k].name}</h2><button class="say">Listen</button></div>
+    <p>Your class tested this in the lab. This is the data. The changed part is highlighted in green.${k.startsWith('light')?' Moving the light changes the <b>brightness</b> and also how much <b>heat</b> reaches the water.':''}</p>${setupChips(k)}
+    <div class="tw"><table class="dt"><tr><th class="l">Minute</th>${MINS.map(i=>`<th>${i}</th>`).join('')}</tr>
+    <tr class="ctl"><th class="l">Control</th>${MINS.map(i=>`<td>${C.control.d[i]}</td>`).join('')}</tr>
+    <tr><th class="l">This trial</th>${MINS.map(i=>`<td class="${i===5||i===10?'rec':''}">${C[k].d[i]}</td>`).join('')}</tr>${mkRow()}</table></div>
+    <div class="legend"><span><i style="border-color:#1E1B2E"></i>Control</span><span><i class="d" style="border-color:#A3146F"></i>${C[k].name}</span></div>${trialChart(k)}
+    <p class="live">Rate: <b class="rec">${fmt(rateOf(k))}</b> disks per minute. Control rate: <b>${fmt(rateOf('control'))}</b>.</p><p class="noread" style="font-size:.85rem">Rate = disks floating at 10 minutes \u00f7 10 minutes.</p>
+    ${mc('cmp_'+k)}
+    ${recBox(k)}`;
+    return;
+  }
+  const p=S.pred[k], ran=S.ran[k];
+  $('#cpanel').innerHTML = `<div class="hd"><h2>${C[k].name}</h2><button class="say">Listen</button></div>
+   <p>You did not test this one in the lab. Make a prediction, then run the trial to see what happens. Only <b>one thing</b> changes from the control (highlighted in green).</p>${setupChips(k)}
+   <div class="grid2"><div><div class="q"><p class="qt">Prediction: compared with the control, the rate will be...</p>
+   ${['faster','slower','about the same'].map(v=>`<label class="opt ${p===v?'sel':''}"><input type="radio" name="pred" value="${v}" ${p===v?'checked':''} ${ran?'disabled':''}>${v}</label>`).join('')}</div>
+   <button class="btn" id="runT" ${p?'':'disabled'}>${ran?'Run it again':'Run the trial'}</button>
+   <p class="live" id="live" aria-live="polite">Minute <b>0</b> of 10</p></div><div class="sim" id="sim"></div></div>
+   <div class="tw"><table class="dt"><tr><th class="l">Minute</th>${MINS.map(i=>`<th>${i}</th>`).join('')}</tr>
+   <tr class="ctl"><th class="l">Control</th>${MINS.map(i=>`<td>${C.control.d[i]}</td>`).join('')}</tr>
+   <tr><th class="l">This trial</th>${MINS.map(i=>`<td id="t${i}" class="${i===5||i===10?'rec':''}">${ran?C[k].d[i]:''}</td>`).join('')}</tr>${mkRow()}</table></div>
+   <div id="cres">${ran?resultHTML(k):''}</div>`;
+  mountSim($('#sim'),k, ran?C[k].d[10]:0);
+  if(ran) $('#live').innerHTML='Minute <b>10</b> of 10';
+}
+function resultHTML(k){
+  const r=rateOf(k), c=rateOf('control'), dir = r>c?'faster':r<c?'slower':'about the same', p=S.pred[k];
+  const right = p===dir;
+  return `<div class="callout ${right?'leaf':'warn'}"><b>${right?'Your prediction was correct.':'Your prediction was different.'}</b> You predicted <b>${p}</b>. The data show the rate was <b>${dir}</b> than the control (${C[k].d[10]} disks floating after 10 minutes, compared with ${C.control.d[10]}). The rate was <b>${fmt(rateOf(k))}</b> disks per minute, compared with ${fmt(rateOf('control'))} for the control.</div>
+   <p><b>Why?</b> ${WHY[k]}</p>
+   <div class="legend"><span><i style="border-color:#1E1B2E"></i>Control</span><span><i class="d" style="border-color:#A3146F"></i>${C[k].name}</span></div>${trialChart(k)}${recBox(k)}`;
+}
+function runTrial(){
+  const k=curC; S.pred[k]=S.pred[k]; let m=0; $('#runT').disabled=true;
+  $$('input[name=pred]').forEach(i=>i.disabled=true);
+  MINS.forEach(i=>$('#t'+i).textContent='');
+  setDisks($('#sim'),0);
+  timer=setInterval(()=>{
+    $('#t'+m).textContent=C[k].d[m]; setDisks($('#sim'),C[k].d[m]); $('#live').innerHTML=`Minute <b>${m}</b> of 10`;
+    if(m>=10){ clearInterval(timer); S.ran[k]=true; save(); $('#cres').innerHTML=resultHTML(k); $('#runT').disabled=false; $('#runT').textContent='Run it again';
+      $$('#ctabs .tab').forEach(b=>b.classList.toggle('done',doneC(b.dataset.c))); updateBoard(); refreshNextExp(); refreshNav(); }
+    m++;
+  }, matchMedia('(prefers-reduced-motion:reduce)').matches?150:650);
+}
+function updateBoard(){
+  const b=$('#board'); if(!b) return; const all=ORDER.every(k=>S.ran[k]); b.hidden=!all; if(!all) return;
+  b.innerHTML=`<h2>Class data board</h2><p>Scientists share results. Here is every trial compared with the control. A plus (+) means a faster rate, a minus (\u2212) means a slower rate.</p>
+  <div class="tw"><table class="dt"><tr><th class="l">Change</th><th>Your prediction (new variables)</th><th>Result</th></tr>${ORDER.filter(k=>k!=='control').map(k=>{const r=rateOf(k),c=rateOf('control');return `<tr><td class="l">${C[k].name}</td><td>${NEWV.includes(k)?(S.pred[k]||''):'class lab data'}</td><td><b>${r>c?'+':r<c?'\u2212':'0'}</b></td></tr>`;}).join('')}</table></div>
+  <p><b>Predictions correct:</b> ${NEWV.filter(k=>{const r=rateOf(k),c=rateOf('control');return S.pred[k]===(r>c?'faster':r<c?'slower':'about the same');}).length} of 2</p>`;
+}
+const GT = {light:'Light distance',temp:'Temperature',co2:'Baking soda (CO\u2082)',color:'Light color'};
+function graphFor(t){
+  if(t==='light') return lineChart({series:[{color:'#A3146F',pts:D.light.x.map((x,i)=>[x,D.light.y[i]])}],xmin:10,xmax:40,ymin:0,ymax:1,xticks:[10,15,20,25,30,35,40],yticks:[0,.2,.4,.6,.8,1],xlabel:'Distance of light (cm)',ylabel:'Rate (disks per min)',desc:'Rate of photosynthesis falls as the light moves from 15 to 35 centimeters.'})+tableOf(['Distance (cm)','Rate'],D.light.x.map((x,i)=>[x,D.light.y[i]]));
+  if(t==='temp') return lineChart({series:[{color:'#B45309',pts:D.temp.x.map((x,i)=>[x,D.temp.y[i]])}],xmin:30,xmax:150,ymin:0,ymax:1,xticks:[40,60,80,100,120,140],yticks:[0,.2,.4,.6,.8,1],xlabel:'Water temperature (\u00b0F)',ylabel:'Rate (disks per min)',desc:'Rate rises with temperature to a peak near 104 degrees Fahrenheit, then drops quickly.'})+tableOf(['Temperature (\u00b0F)','Rate'],D.temp.x.map((x,i)=>[x,D.temp.y[i]]));
+  if(t==='co2') return lineChart({cat:D.co2.x,series:[{color:'#1F7A4D',pts:D.co2.x.map((x,i)=>[i,D.co2.y[i]])}],ymin:0,ymax:1.2,yticks:[0,.2,.4,.6,.8,1,1.2],xlabel:'Baking soda in 100 mL of water (tsp)',ylabel:'Rate (disks per min)',desc:'Rate rises steeply with more baking soda, then levels off at one half teaspoon.'})+tableOf(['Baking soda (tsp)','Rate'],D.co2.x.map((x,i)=>[x,D.co2.y[i]]));
+  const wc=w=>w<450?'#5B2A9E':w<490?'#2B59C3':w<530?'#1F9E8F':w<570?'#2E9E4F':w<590?'#C7A800':w<620?'#E07B00':'#D7263D';
+  return lineChart({series:[{color:'#5A5470',pts:D.wave.x.map((x,i)=>[x,D.wave.y[i]]),pc:D.wave.x.map(wc)}],xmin:380,xmax:720,ymin:0,ymax:100,xticks:[400,450,500,550,600,650,700],yticks:[0,20,40,60,80,100],xlabel:'Wavelength of light (nm)',ylabel:'Relative rate (%)',desc:'Rate of photosynthesis by wavelength. Peaks near 425 and 675 nanometers; lowest near 550 nanometers.'})+tableOf(['Wavelength (nm)','Relative rate (%)'],D.wave.x.map((x,i)=>[x,D.wave.y[i]]));
+}
+const GQ = {light:['light_trend'],temp:['temp_peak','temp_drop'],co2:['co2_trend','co2_limit'],color:['col_best','col_green']};
+function s5(){
+  const t=S.gtab;
+  const tdone=k=>GQ[k].every(okQ)&&(k!=='light'||S.interp.ok);
+  return `<section class="card">${head('Read the graphs')}
+   <p>Scientists look for <b>patterns</b> in graphs. Choose each graph, study the shape, and answer the questions. These graphs come from the same kind of spinach disk lab you just ran.</p>
+   <div class="tabs" id="gtabs">${Object.entries(GT).map(([k,v])=>`<button class="tab ${k===t?'cur':''} ${tdone(k)?'done':''}" data-g="${k}">${v}</button>`).join('')}</div>
+   <div id="gfig">${graphFor(t)}</div>
+   <div id="gq">${GQ[t].map(mc).join('')}${t==='light'?interpHTML():''}</div></section>`;
+}
+function interpHTML(){
+  const ok=S.interp.ok;
+  return `<div class="q"><p class="qt">Estimate: what rate would you expect if the light were 20 cm away? (Look between the points at 15 cm and 25 cm.)</p>
+   <input class="cell ${ok?'good':''}" style="width:6rem" id="interp" type="text" inputmode="decimal" value="${S.interp.val!=null?esc(S.interp.val):''}" aria-label="Estimated rate at 20 centimeters"> disks per minute
+   <div class="fb ${S.interp.val!=null&&!ok?'no':ok?'ok':''}" id="interpfb">${ok?'Good estimate. 20 cm is halfway between 15 cm and 25 cm, so the rate should be about halfway between 0.9 and 0.6. That is about 0.75.':(S.interp.val!=null?'Not quite. Find the number halfway between the rate at 15 cm and the rate at 25 cm.':'')}</div></div>`;
+}
+
+/* ---------- design lab ---------- */
+const TEMPS=[40,60,72,85,100,104,113,122,140];
+const F_DIST={10:1.3,15:1.5,20:1.25,25:1,30:.8,35:.67,40:.5};
+const F_COL={white:1,rb:1.5,green:.5};
+const F_SODA={0:.17,1:1,2:1.33,4:1.5,8:1.67};
+const F_TEMP=[.33,.75,1,1.2,1.33,1.4,.9,.35,0];
+function designCalc(){
+  const c=S.design.cfg, f={dist:F_DIST[c.dist],color:F_COL[c.color],soda:F_SODA[c.soda],temp:F_TEMP[c.tempI]};
+  const total=f.dist*f.color*f.soda*f.temp, names={dist:'Light distance',color:'Light color',soda:'Baking soda (CO\u2082)',temp:'Temperature'};
+  let lim=Object.keys(f).reduce((a,b)=>f[a]<=f[b]?a:b);
+  return {f,total:total*100,lim,names};
+}
+function s6(){
+  const c=S.design.cfg;
+  return `<section class="card">${head('Design the best setup')}
+   <p>Now use what you learned. Change the settings and the model shows the predicted rate. <b>100%</b> is the same speed as the control. Test at least three different setups and finish the three design challenges below.</p>
+   <div class="callout warn"><b>Careful:</b> factors work together. Something that helps a little can hurt a lot if you go too far.</div>
+   <div class="grid2"><div>
+    <div class="slidr"><label for="dd"><span>Light distance</span><span id="ddv"></span></label><input type="range" id="dd" min="10" max="40" step="5" value="${c.dist}"></div>
+    <div class="slidr"><label for="dc"><span>Light color</span></label><select id="dc"><option value="white">White light</option><option value="rb">Red and blue light</option><option value="green">Green light</option></select></div>
+    <div class="slidr"><label for="ds"><span>Baking soda</span><span id="dsv"></span></label><input type="range" id="ds" min="0" max="4" step="1" value="1"></div>
+    <div class="slidr"><label for="dt"><span>Water temperature</span><span id="dtv"></span></label><input type="range" id="dt" min="0" max="8" step="1" value="${c.tempI}"></div>
+   </div><div><div class="sim" id="sim"></div></div></div>
+   <h3>Predicted rate: <span id="dpct"></span></h3><div class="gauge" aria-hidden="true"><div class="g" id="dg"></div><div class="mk" style="left:${250/6}%"></div></div>
+   <p class="noread" style="font-size:.85rem;margin:.2rem 0">The black line marks 250%. The scale goes to 600%.</p>
+   <h3>What is limiting the rate?</h3><div id="dfac"></div>
+   <h3>Design challenges</h3><ul id="dchal" style="padding-left:1.2rem;margin:.3rem 0"></ul>
+   <p class="noread" id="dmsg" aria-live="polite" style="font-weight:600"></p>
+   <p>Setups tested: <b id="dtests">${S.design.tests}</b> of 3</p>
+   <h3>Record your design</h3>${wrote('design','Part 5, questions 11 to 16. Record your best setup and its percent numbers, name your limiting factor, answer the two heat challenges, draw your setup, and explain one choice using a science idea.')}</section>`;
+}
+const SODA_L={0:'none',1:'1/16 tsp',2:'1/8 tsp',4:'1/4 tsp',8:'1/2 tsp'}, SODA_I=[0,1,2,4,8];
+let lastSig='';
+function designUpdate(count){
+  const c=S.design.cfg, r=designCalc();
+  $('#ddv').textContent=c.dist+' cm'; $('#dsv').textContent=SODA_L[c.soda]; $('#dtv').textContent=TEMPS[c.tempI]+' \u00b0F';
+  $('#dc').value=c.color; $('#ds').value=SODA_I.indexOf(c.soda);
+  $('#dpct').textContent=Math.round(r.total)+'% of control';
+  $('#dg').style.width=Math.min(100,r.total/6)+'%'; $('#dg').style.background=r.total>=250?'var(--leaf)':'var(--grow)';
+  $('#dfac').innerHTML=Object.keys(r.f).map(k=>`<div class="fbar ${k===r.lim?'lim':''}"><span>${r.names[k]}</span><div class="bg"><div class="f" style="width:${Math.min(100,r.f[k]/1.7*100)}%"></div></div><span>${Math.round(r.f[k]*100)}%</span></div>`).join('');
+  const msgs=[];
+  msgs.push(`The lowest factor is <b>${r.names[r.lim]}</b>. That is the limiting factor right now.`);
+  if(c.dist<=10) msgs.push('A bulb this close heats the water, so you lose some benefit.');
+  if(TEMPS[c.tempI]>=113) msgs.push('That is hot enough to start denaturing enzymes.');
+  if(r.total>=250) msgs.push('You reached the goal!');
+  $('#dmsg').innerHTML=msgs.join(' ');
+  S.design.best=Math.max(S.design.best,Math.round(r.total));
+  if(r.lim==='temp') S.design.c2=true;
+  if(r.total<100 && r.f.dist>1 && r.f.color>1 && r.f.soda>1) S.design.c3=true;
+  const ch=[[S.design.best>=250,'Reach 250% or more.'],[!!S.design.c2,'Make temperature the limiting factor (the lowest bar).'],[!!S.design.c3,'Show what too much heat does: get below 100% even though the light, light color, and CO\u2082 are all better than the control.']];
+  $('#dchal').innerHTML=ch.map(([d,t])=>`<li style="margin:.3rem 0;${d?'color:var(--leaf);font-weight:600':''}">${d?'\u2713 ':''}${t}</li>`).join('');
+  const su={dist:c.dist,color:c.color,soda:c.soda,temp:TEMPS[c.tempI]>=95?'warm':TEMPS[c.tempI]<=60?'cold':'room'};
+  $('#sim').innerHTML=beakerSVG(su); setDisks($('#sim'),Math.max(0,Math.min(10,Math.round(r.total/100*6))));
+  const sig=[c.dist,c.color,c.soda,c.tempI].join('|');
+  if(sig!==lastSig){ lastSig=sig; }
+}
+let testTimer=null;
+function designChanged(){
+  designUpdate(); clearTimeout(testTimer);
+  testTimer=setTimeout(()=>{ const c=S.design.cfg, sig=[c.dist,c.color,c.soda,c.tempI].join('|'); S.design.seen=S.design.seen||[]; if(!S.design.seen.includes(sig)){ S.design.seen.push(sig); S.design.tests=S.design.seen.length; $('#dtests').textContent=S.design.tests; } save(); refreshNav(); },700);
+}
+
+/* ---------- wrap-up ---------- */
+function s8(){
+  const picks=[['yes','Yes, my first idea was right.'],['partly','Partly right.'],['no','No, my idea changed.']];
+  const total=NEWV.filter(k=>{const r=rateOf(k),c=rateOf('control');return S.pred[k]===(r>c?'faster':r<c?'slower':'about the same');}).length;
+  return `<section class="card">${head('Check what you learned')}${mc('ex_limit')}${mc('ex_plateau')}${mc('ex_data')}${mc('ex_var')}</section>
+  <section class="card"><h2>Look back</h2><p>At the start you picked <b>${S.first?FACTORS[S.first]:'one factor'}</b> as the most important.</p>
+   ${picks.map(([v,t])=>`<label class="opt ${S.reflPick===v?'sel':''}"><input type="radio" name="rp" value="${v}" ${S.reflPick===v?'checked':''}>${t}</label>`).join('')}
+   ${wrote('refl','Part 6, question 17. Write one thing that surprised you or changed your thinking.')}</section>
+  <section class="card" id="summary" ${complete[5]()?'':'hidden'}>${summaryHTML(total)}</section>`;
+}
+function summaryHTML(total){
+  const d=S.design.cfg;
+  return `<h2>My lab summary</h2><p><b>Name:</b> ${esc(S.name)}</p>
+   <p><b>Predictions correct:</b> ${total} of 4. <b>Best design score:</b> ${S.design.best}% of control.</p>
+   <div class="tw"><table class="dt sumtbl"><tr><th class="l">Trial</th><th>Disks at 10 min</th><th>Rate</th></tr>${Object.keys(C).map(k=>`<tr><td class="l">${C[k].name}</td><td>${C[k].d[10]}</td><td>${fmt(rateOf(k))}</td></tr>`).join('')}</table></div>
+   <p><b>My ideal setup:</b> light ${d.dist} cm away, ${d.color==='rb'?'red and blue light':d.color==='green'?'green light':'white light'}, baking soda ${SODA_L[d.soda]}, water ${TEMPS[d.tempI]} \u00b0F.</p>
+   <p><b>You are finished with the online activity.</b> Turn in your worksheet.</p>`;
+}
+function summaryText(){
+  const d=S.design.cfg;
+  return `Spinach Disk Lab results for ${S.name}
+Ideal setup: light ${d.dist} cm, ${d.color}, baking soda ${SODA_L[d.soda]}, ${TEMPS[d.tempI]} F (predicted ${S.design.best}% of control)`;
+}
+
+/* ---------- what do I do next ---------- */
+const firstBad = ids => ids.find(i=>!okQ(i));
+const askQ = id => `Answer this question on the screen: \u201c${Q[id].q}\u201d`;
+const REC = k => `Record your data. Open your worksheet and find the row called \u201c${ROWN[k]}\u201d in the Results chart. Copy the numbers from the gold boxes into that row. Then check the box that says \u201cI copied this row into my chart.\u201d`;
+const A=(text,el)=>({text,el});
+const qEl = id => ()=>$(`.q[data-q="${id}"]`);
+const inpEl = sel => ()=>{ const e=$(sel); return e?(e.closest('label')||e):null; };
+function nextAction(){
+  const st=S.step, NEXTB=A('Click the Next button at the bottom of the page.',()=>$('#bNext'));
+  if(st===0){
+    if(!S.name.trim()) return A('Click the box under \u201cYour name\u201d and type your name.',()=>$('#nm'));
+    if(!S.first) return A('Pick the one factor you think changes the rate of photosynthesis the most. Click one of the four choices.',()=>$('input[name="first"]').closest('.q'));
+    if(!S.wrote.first) return A('Open your worksheet. In Part 1, question 2, write one sentence that says why you picked that factor. Then check the box that says \u201cI wrote my answer on my worksheet.\u201d',inpEl('input[data-wrote="first"]'));
+    return NEXTB;
+  }
+  if(st===1){ const b=firstBad(['why_float','baking','faster']); return b?A(askQ(b),qEl(b)):NEXTB; }
+  if(st===2){
+    const k=curCond();
+    if(!k) return NEXTB;
+    if(k==='control'){ const b=firstBad(CTLQ); if(b) return A(`Study the control data above. ${askQ(b)}`,qEl(b)); return A(REC('control'),()=>$('#recwrap')); }
+    if(TESTED.includes(k)){
+      if(!okQ('cmp_'+k)) return A(`Look at the data for \u201c${C[k].name}\u201d. Then answer the question under the graph: was the rate faster, slower, or about the same as the control?`,qEl('cmp_'+k));
+      if(!S.rec[k]) return A(REC(k),()=>$('#recwrap'));
+    } else {
+      if(!S.pred[k]) return A(`Make your prediction for \u201c${C[k].name}\u201d. Click faster, slower, or about the same.`,()=>$('input[name="pred"]').closest('.q'));
+      if(!S.ran[k]) return A('Click the Run the trial button and watch the disks.',()=>$('#runT'));
+      if(!S.rec[k]) return A(REC(k),()=>$('#recwrap'));
+    }
+    return A('Click the Next experiment button.',()=>$('#nextExpBtn'));
+  }
+  if(st===3){
+    const tabOrder=['light','temp','co2','color'], tdone=t=>GQ[t].every(okQ)&&(t!=='light'||S.interp.ok);
+    const cur=S.gtab;
+    if(!tdone(cur)){ const b=firstBad(GQ[cur]); if(b) return A(askQ(b),qEl(b)); return A('Type your estimate for the rate at 20 cm in the box under the graph.',()=>$('#interp')); }
+    const nt=tabOrder.find(t=>!tdone(t)); if(nt) return A(`Click the \u201c${GT[nt]}\u201d tab above the graph, then answer its questions.`,()=>$(`#gtabs .tab[data-g="${nt}"]`));
+    return NEXTB;
+  }
+  if(st===4){
+    const d=S.design, sl=id=>()=>{const e=$(id); return e?(e.closest('.slidr')||e):null;};
+    if(d.tests<3) return A(`Move the sliders to try a different setup. You have tried ${d.tests} of 3. Change one slider, wait a second, then change another.`,sl('#dd'));
+    if(d.best<250) return A('Keep changing the sliders until the predicted rate reaches 250% or more. Try moving the light closer, using red and blue light, and adding more baking soda.',sl('#dd'));
+    if(!d.c2) return A('Design challenge 2: change the water temperature slider until the Temperature bar is the shortest (red) bar.',sl('#dt'));
+    if(!d.c3) return A('Design challenge 3: keep the light close, use red and blue light, add lots of baking soda, then slide the temperature all the way to 140 \u00b0F. The rate should fall below 100%.',sl('#dt'));
+    if(!S.wrote.design) return A('Open your worksheet. In Part 5, questions 11 to 16, record your best setup, answer the questions, and draw your setup. Then check the box that says \u201cI wrote my answer on my worksheet.\u201d',inpEl('input[data-wrote="design"]'));
+    return NEXTB;
+  }
+  if(st===5){
+    const b=firstBad(['ex_limit','ex_plateau','ex_data','ex_var']); if(b) return A(askQ(b),qEl(b));
+    if(!S.reflPick) return A('Under \u201cLook back\u201d, click whether your first idea was right.',()=>$('input[name="rp"]').closest('.card'));
+    if(!S.wrote.refl) return A('Open your worksheet. In Part 6, question 17, write one thing that surprised you or changed your thinking. Then check the box on the screen.',inpEl('input[data-wrote="refl"]'));
+    return A('You are finished! Turn in your worksheet.',()=>$('#summary'));
+  }
+  return NEXTB;
+}
+function clearHL(){ $$('.hl').forEach(e=>e.classList.remove('hl')); }
+function showHelp(){
+  clearHL(); const n=nextAction(); const pop=$('#helpPop'); $('#helpTxt').textContent=n.text; pop.classList.remove('bottom'); pop.classList.add('open');
+  let el=null; try{ el=n.el&&n.el(); }catch(e){}
+  if(el){
+    el.classList.add('hl');
+    const pb=pop.getBoundingClientRect().bottom;
+    window.scrollBy({top:el.getBoundingClientRect().top-(pb+52),behavior:'auto'});
+    const r2=el.getBoundingClientRect(), p2=pop.getBoundingClientRect();
+    if(r2.top-34 < p2.bottom && r2.bottom > p2.top){
+      pop.classList.add('bottom');
+      window.scrollBy({top:el.getBoundingClientRect().top-175,behavior:'auto'});
+    }
+  }
+  return n;
+}
+/* ---------- render / nav ---------- */
+function renderSteps(){
+  $('#stepsNav').innerHTML = NAMES.map((n,i)=>{ const locked = !TEACHER && i>S.maxStep; return `<button data-s="${i}" class="${i===S.step?'cur':(i<S.step||(i<S.maxStep&&complete[i]()))?'done':''}" ${locked?'disabled':''}>${i+1}. ${n}</button>`; }).join('');
+}
+function refreshNav(){
+  const ok = TEACHER || complete[S.step]();
+  const last = S.step===NAMES.length-1;
+  $('#bNext').style.visibility = last?'hidden':'visible'; $('#bNext').disabled = !ok;
+  $('#bBack').disabled = S.step===0;
+  $('#hint').textContent = ok ? '' : HINTS[S.step];
+  if(ok && !last) S.maxStep=Math.max(S.maxStep,S.step+1);
+  if(last && ok){ const sm=$('#summary'); if(sm){ sm.hidden=false; sm.innerHTML=summaryHTML(NEWV.filter(k=>{const r=rateOf(k),c=rateOf('control');return S.pred[k]===(r>c?'faster':r<c?'slower':'about the same');}).length); } }
+  renderSteps(); save();
+}
+function go(n){
+  speechSynthesis && speechSynthesis.cancel(); clearInterval(timer);
+  S.step=n; S.maxStep=Math.max(S.maxStep,n); $('#main').innerHTML=stepHTML(n); init(n); refreshNav(); window.scrollTo({top:0}); $('#main').focus({preventScroll:true});
+}
+function init(n){
+  if(n===1) showMeth(0);
+  if(n===2){ showCond(curCond()||ORDER[ORDER.length-1]); updateBoard(); refreshNextExp(); }
+  if(n===4){ $('#dc').value=S.design.cfg.color; designUpdate(); }
+}
+function showMeth(i){
+  $$('#mtabs .tab').forEach(b=>b.classList.toggle('cur',+b.dataset.m===i));
+  $('#mfig').innerHTML=methFig(i); if(i===2) setDisks($('#mfig'),6);
+  $('#mtxt').innerHTML=`<h3>${i+1}. ${METH[i][0]}</h3><p>${METH[i][1]}</p><div class="chips">${i>0?`<button class="btn alt sm" data-mgo="${i-1}">Previous</button>`:''}${i<3?`<button class="btn sm" data-mgo="${i+1}">Next step</button>`:''}</div>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('.say')){ const b=t.closest('.say'); if(b.dataset.w) speak(b.dataset.w); else speak(cardText(b.closest('.card'))); return; }
+  if(t.dataset.mgo){ showMeth(+t.dataset.mgo); return; }
+  const mt=t.closest('#mtabs .tab'); if(mt){ showMeth(+mt.dataset.m); return; }
+  const ct=t.closest('#ctabs .tab'); if(ct && TEACHER){ showCond(ct.dataset.c); refreshNextExp(); return; }
+  if(t.id==='nextExpBtn'){ const k=curCond(); if(k){ showCond(k); refreshNextExp(); $('#ctabs').scrollIntoView({block:'start'}); } return; }
+  const gt=t.closest('#gtabs .tab'); if(gt){ S.gtab=gt.dataset.g; $('#main').innerHTML=stepHTML(3); save(); return; }
+  if(t.id==='nextMin'){ if(S.ctl.minute<10){ S.ctl.minute++; ctlTable(); ctlLive(); save(); } return; }
+  if(t.id==='runT'){ runTrial(); return; }
+  const sb=t.closest('#stepsNav button'); if(sb && !sb.disabled){ go(+sb.dataset.s); return; }
+});
+$('#helpBtn').onclick=e=>{ e.stopPropagation(); showHelp(); };
+$('#helpClose').onclick=()=>$('#helpPop').classList.remove('open');
+$('#helpSay').onclick=()=>speak(nextAction().text);
+document.addEventListener('click',e=>{ if(!e.target.closest('#helpPop,#helpBtn')) $('#helpPop').classList.remove('open'); },true);
+['change','input'].forEach(ev=>document.addEventListener(ev,()=>clearHL(),true));
+document.addEventListener('click',e=>{ if(e.target.closest('.hl,#bNext,#runT,#nextExpBtn,.tab,.btn')) setTimeout(clearHL,0); },true);
+$('#bNext').onclick=()=>{ clearHL(); $('#helpPop').classList.remove('open'); go(S.step+1); };
+$('#bBack').onclick=()=>go(S.step-1);
+$('#tListen').onclick=()=>speak($('#main').innerText);
+$('#tStop').onclick=()=>speechSynthesis&&speechSynthesis.cancel();
+let fs=+(localStorage.getItem('sdl.fs')||18); const setFs=n=>{fs=Math.max(15,Math.min(26,n));document.documentElement.style.fontSize=fs+'px';try{localStorage.setItem('sdl.fs',fs);}catch(e){}}; setFs(fs);
+$('#tSmall').onclick=()=>setFs(fs-2); $('#tBig').onclick=()=>setFs(fs+2);
+const dr=(o)=>{$('#drawer').classList.toggle('open',o);$('#scrim').classList.toggle('open',o);};
+$('#tVocab').onclick=()=>dr(true); $('#vClose').onclick=()=>dr(false); $('#scrim').onclick=()=>dr(false);
+
+document.addEventListener('change',e=>{
+  const t=e.target, n=t.name;
+  if(Q[n] && t.type==='radio'){
+    const q=Q[n], pick=+t.value, ok=pick===q.a, host=t.closest('.q');
+    S.ans[n]={pick,ok,tries:((S.ans[n]&&S.ans[n].tries)||0)+1};
+    $$('.opt',host).forEach((l,i)=>{ l.classList.toggle('right',ok&&i===q.a); l.classList.toggle('wrong',!ok&&i===pick); });
+    $('.fb',host).className='fb '+(ok?'ok':'no'); $('.fb',host).textContent = ok?q.ok:'Not quite. '+q.hint+' Try again.';
+    if(ok) $$('input',host).forEach(i=>i.disabled=true);
+    if(S.step===3) $$('#gtabs .tab').forEach(b=>b.classList.toggle('done',GQ[b.dataset.g].every(okQ)&&(b.dataset.g!=='light'||S.interp.ok)));
+    if(ok && n.startsWith('cmp_')) updateRec();
+    if(ok && CTLQ.includes(n) && allQ(CTLQ)){ S.ran.control=true; $$('#ctabs .tab').forEach(b=>b.classList.toggle('done',doneC(b.dataset.c))); updateBoard(); refreshNextExp(); }
+    if(ok && n.startsWith('cmp_')){ S.ran[n.slice(4)]=true; $$('#ctabs .tab').forEach(b=>b.classList.toggle('done',doneC(b.dataset.c))); updateBoard(); refreshNextExp(); }
+    refreshNav(); return;
+  }
+  if(n==='first'){ S.first=t.value; $$('.opt').forEach(l=>l.classList.toggle('sel',l.contains(t)&&t.checked)); refreshNav(); }
+  if(n==='pred'){ S.pred[curC]=t.value; $$('#cpanel .opt').forEach(l=>l.classList.toggle('sel',l.contains(t))); $('#runT').disabled=false; }
+  if(n==='rp'){ S.reflPick=t.value; $$('input[name=rp]').forEach(i=>i.closest('.opt').classList.toggle('sel',i.checked)); refreshNav(); }
+  if(t.dataset.rec){ S.rec[t.dataset.rec]=t.checked; t.closest('.opt').classList.toggle('sel',t.checked); $$('#ctabs .tab').forEach(b=>b.classList.toggle('done',doneC(b.dataset.c))); updateBoard(); refreshNextExp(); refreshNav(); }
+  if(t.dataset.wrote){ S.wrote[t.dataset.wrote]=t.checked; t.closest('.opt').classList.toggle('sel',t.checked); refreshNav(); }
+  if(t.id==='dc'){ S.design.cfg.color=t.value; designChanged(); }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='nm'){ S.name=t.value; refreshNav(); }
+  if(t.id==='fw'){ S.firstWhy=t.value; save(); }
+  if(t.dataset.ci!==undefined){
+    const i=+t.dataset.ci, v=t.value===''?null:+t.value; S.ctl.rec[i]=v; const good=v===C.control.d[i];
+    t.className='cell '+(v===null?'':good?'good':'bad');
+    const fb=$('#ctlfb'); fb.className='fb '+(v===null?'':good?'ok':'no'); fb.textContent = v===null?'':good?'Correct.':'Count again. Look at how many disks are at the top of the beaker.';
+    if(S.ctl.rec.every((x,j)=>x===C.control.d[j])){ $('#ctlres').hidden=false; $('#ctlg').innerHTML=trialChart('control',false); fb.textContent='All counts correct. Great data collection.'; }
+    refreshNav();
+  }
+  if(t.id==='interp'){ S.interp.val=t.value; const v=parseFloat(t.value.replace(',','.')); S.interp.ok=!isNaN(v)&&Math.abs(v-.75)<=.06; t.className='cell '+(t.value===''?'':S.interp.ok?'good':'bad');
+    const fb=$('#interpfb'); fb.className='fb '+(t.value===''?'':S.interp.ok?'ok':'no'); fb.textContent=S.interp.ok?'Good estimate. 20 cm is halfway between 15 cm and 25 cm, so the rate should be about halfway between 0.9 and 0.6. That is about 0.75.':(t.value===''?'':'Not quite. Find the number halfway between the rate at 15 cm and the rate at 25 cm.');
+    $$('#gtabs .tab').forEach(b=>b.classList.toggle('done',GQ[b.dataset.g].every(okQ)&&(b.dataset.g!=='light'||S.interp.ok))); refreshNav(); }
+  if(t.id==='dd'){ S.design.cfg.dist=+t.value; designChanged(); }
+  if(t.id==='ds'){ S.design.cfg.soda=SODA_I[+t.value]; designChanged(); }
+  if(t.id==='dt'){ S.design.cfg.tempI=+t.value; designChanged(); }
+  if(t.id==='dwhy'){ S.design.why=t.value; refreshNav(); }
+  if(t.id==='refl'){ S.refl=t.value; refreshNav(); }
+});
+go(Math.min(S.step,NAMES.length-1));
+</script>
+</body>
+</html>
